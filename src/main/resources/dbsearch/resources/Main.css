@@ -1,0 +1,8 @@
+.leftPane {
+    -fx-background-color: #d0d0d0;
+    -fx-border-color: #d0d0d0 black #d0d0d0 #d0d0d0;
+}
+
+.labelColumn {
+    -fx-font-weight: bold;
+}

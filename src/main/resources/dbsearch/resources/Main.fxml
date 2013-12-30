@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="494.0" prefWidth="889.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="dbsearch.MainController">
+  <children>
+    <BorderPane prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <center>
+        <TableView prefHeight="-1.0" prefWidth="-1.0">
+          <columns>
+            <TableColumn prefWidth="75.0" text="Column X" />
+            <TableColumn prefWidth="75.0" text="Column X" />
+          </columns>
+        </TableView>
+      </center>
+      <left>
+        <VBox maxWidth="-Infinity" minWidth="-Infinity" prefHeight="494.0" prefWidth="317.0" styleClass="leftPane" BorderPane.alignment="TOP_LEFT">
+          <children>
+            <GridPane gridLinesVisible="false" hgap="5.0" prefHeight="-1.0" prefWidth="-1.0" snapToPixel="true" styleClass="labelColumn" vgap="5.0" VBox.vgrow="NEVER">
+              <children>
+                <Label text="Database:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <HBox alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                  <children>
+                    <ChoiceBox prefWidth="-1.0" HBox.hgrow="ALWAYS">
+                      <items>
+                        <FXCollections fx:factory="observableArrayList">
+                          <String fx:value="Item 1" />
+                          <String fx:value="Item 2" />
+                          <String fx:value="Item 3" />
+                        </FXCollections>
+                      </items>
+                      <HBox.margin>
+                        <Insets right="5.0" />
+                      </HBox.margin>
+                    </ChoiceBox>
+                    <Button mnemonicParsing="false" text="..." />
+                  </children>
+                </HBox>
+                <Label text="Search:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField prefHeight="-1.0" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <FlowPane hgap="5.0" prefHeight="-1.0" prefWidth="200.0" vgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <children>
+                    <CheckBox mnemonicParsing="false" text="Like" />
+                    <CheckBox mnemonicParsing="false" text="Include SYS" />
+                    <CheckBox mnemonicParsing="false" text="Include LONG Fields" />
+                  </children>
+                </FlowPane>
+                <Button mnemonicParsing="false" text="Search" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+                  <GridPane.margin>
+                    <Insets />
+                  </GridPane.margin>
+                </Button>
+              </children>
+              <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="101.0" minWidth="10.0" prefWidth="99.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="-1.0" />
+              </columnConstraints>
+              <padding>
+                <Insets />
+              </padding>
+              <rowConstraints>
+                <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="37.0" valignment="TOP" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="21.0" minHeight="10.0" prefHeight="21.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+              <VBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+              </VBox.margin>
+            </GridPane>
+          </children>
+        </VBox>
+      </left>
+    </BorderPane>
+  </children>
+  <stylesheets>
+    <URL value="@Main.css" />
+  </stylesheets>
+</AnchorPane>
