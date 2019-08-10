@@ -1,4 +1,4 @@
-package dbsearch;
+package dbsearch.fx;
 
 /**
  * dbsearch: MainController

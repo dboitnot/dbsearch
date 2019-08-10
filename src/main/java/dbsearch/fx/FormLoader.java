@@ -1,4 +1,4 @@
-package dbsearch;
+package dbsearch.fx;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
