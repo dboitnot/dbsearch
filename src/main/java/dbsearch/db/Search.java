@@ -14,7 +14,7 @@ import java.util.List;
  * Created by dboitnot on 12/29/13.
  */
 public class Search {
-    private static final String COL_SQL = "select c.owner, c.table_name, c.column_name from dba_tab_cols c, dba_tables t where (c.owner = t.owner and c.table_name = t.table_name and t.tablespace_name is not null) and (%s) order by num_rows";
+    private static final String COL_SQL = "select c.owner, c.table_name, c.column_name from all_tab_cols c, all_tables t where (c.owner = t.owner and c.table_name = t.table_name and t.tablespace_name is not null) and (%s) order by num_rows";
 
     private final Db db;
     private final String searchString;
