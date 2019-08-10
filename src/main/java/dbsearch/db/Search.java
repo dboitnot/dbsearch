@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +107,8 @@ public class Search {
                     break;
                 }
             }
+        } catch (SQLSyntaxErrorException ex) {
+            listener.permissionError(table, ex);
         } finally {
             if (stm != null)
                 stm.close();
@@ -138,6 +141,11 @@ public class Search {
                 @Override
                 public void tooManyTableResults(SearchTable tbl) {
                     System.out.println("   ...");
+                }
+
+                @Override
+                public void permissionError(SearchTable tbl, Exception ex) {
+                    System.out.println("\nPermission Error: " + tbl);
                 }
             };
             Search search = new Search(db, "prod", listener, false);

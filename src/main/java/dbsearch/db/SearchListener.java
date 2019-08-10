@@ -5,7 +5,8 @@ package dbsearch.db;
  * Created by dboitnot on 12/29/13.
  */
 public interface SearchListener {
-    public void searchingTable(SearchTable tbl);
-    public void handleResult(SearchResult result);
-    public void tooManyTableResults(SearchTable tbl);
+    void searchingTable(SearchTable tbl);
+    void handleResult(SearchResult result);
+    void permissionError(SearchTable tbl, Exception ex);
+    void tooManyTableResults(SearchTable tbl);
 }
