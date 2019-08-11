@@ -1,5 +1,7 @@
 package dbsearch.db;
 
+import dbsearch.SearchConf;
+import dbsearch.SearchListener;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -9,52 +11,58 @@ import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 /**
  * dbsearch: Search
  * Created by dboitnot on 12/29/13.
  */
 public class Search {
-    private static final String COL_SQL = "select c.owner, c.table_name, c.column_name from all_tab_cols c, all_tables t where (c.owner = t.owner and c.table_name = t.table_name and t.tablespace_name is not null) and (%s) order by num_rows";
+    private static final String COL_SQL = "select c.owner, c.table_name, c.column_name from all_tab_cols c, all_tables t \n where (c.owner = t.owner and c.table_name = t.table_name and t.tablespace_name is not null) and (%s) order by num_rows";
 
     private final Db db;
-    private final String searchString;
+    private final SearchConf conf;
     private final SearchListener listener;
-    private final boolean includeSys;
-    private int maxTableResults = 20;
 
-    public Search(Db db, String searchString, SearchListener listener, boolean includeSys) {
+    private Search(Db db, SearchConf conf, SearchListener listener) {
         this.db = db;
-        this.searchString = searchString;
+        this.conf = conf;
         this.listener = listener;
-        this.includeSys = includeSys;
     }
 
     private String getColSql() {
-        String where = "(data_type like '%CHAR%')";
-        where += String.format(" and (data_length >= %d) and num_rows > 0", searchString.length());
+        StringBuilder w = new StringBuilder("(data_type like '%CHAR%')");
+        w.append(format(" and (data_length >= %d) and num_rows > 0", conf.getSearchString().length()));
 
-        // TODO: Formalize this.
-        where += " and num_rows < 100";
+        conf.getMaxRowCount().ifPresent(c -> w.append(format(" and num_rows <= %d", c)));
 
-        // TODO: Replace this with a list of excluded schemas.
-        if (!includeSys) {
-            where += " and c.owner not in ('SYS', 'SYSTEM', 'SCTCVT', 'XDB', 'DBSNMP')";
-        }
+        inList(conf.getExcludedOwners()).ifPresent(l -> w.append(format(" and c.owner not in %s", l)));
+        inList(conf.getIncludedOwners()).ifPresent(l -> w.append(format(" and c.owner in %s", l)));
 
-        // TODO: Formalize this.
-        where += " and c.owner not like '%CVT' and c.table_name not like '%CVT'";
+        conf.getExcludedOwnerPatterns().forEach(p -> w.append(format(" and c.owner not like '%s'", p)));
+        conf.getExcludedTableNamePatterns().forEach(p -> w.append(format(" and c.table_name not like '%s'", p)));
 
-        return String.format(COL_SQL, where);
+        return format(COL_SQL, w.toString());
+    }
+
+    private static Optional<String> inList(List<String> list) {
+        if (list == null)
+            return Optional.empty();
+        String l = list.stream()
+                .map(o -> format("'%s'", o.toUpperCase()))
+                .collect(Collectors.joining(", "));
+        if (l.length() > 0)
+            return Optional.of(format("(%s)", l));
+        return Optional.empty();
     }
 
     private void search() throws SQLException {
-        Statement stm = null;
-        try {
-            stm = db.createStatement();
+        try (Statement stm = db.createStatement()) {
 
             String sql = getColSql();
-            //System.out.println("SQL: " + sql);
 
             ResultSet res = stm.executeQuery(sql);
 
@@ -73,32 +81,28 @@ public class Search {
                 SearchColumn column = new SearchColumn(res.getString(3));
                 searchTable.addSearchColumn(column);
             }
-        } finally {
-            if (stm != null)
-                stm.close();
         }
     }
 
     private void searchInTable(SearchTable table) throws SQLException {
         listener.searchingTable(table);
 
-        String escapedSearchString = StringEscapeUtils.escapeSql(searchString.toLowerCase());
+        String escapedSearchString = StringEscapeUtils.escapeSql(conf.getSearchString().toLowerCase());
 
         List<String> searchClauses = new ArrayList<>();
         for (SearchColumn column: table.getSearchColumns()) {
-            searchClauses.add(String.format("lower(\"%s\") like '%%%s%%'", column.getName(), escapedSearchString));
+            searchClauses.add(format("lower(\"%s\") like '%%%s%%'", column.getName(), escapedSearchString));
         }
         String where = "(" + StringUtils.join(searchClauses, " or ") + ")";
 
-        String sql = String.format("select * from \"%s\".\"%s\" where %s", table.getOwner(), table.getTableName(), where);
+        String sql = format("select * from \"%s\".\"%s\" where %s", table.getOwner(), table.getTableName(), where);
 
         //System.out.println("SQL: " + sql);
 
-        Statement stm = null;
-        try {
-            stm = db.createStatement();
+        try (Statement stm = db.createStatement()) {
             ResultSet res = stm.executeQuery(sql);
             int count = 0;
+            long maxTableResults = conf.getMaxRowCount().orElse(Long.MAX_VALUE);
             while (res.next()) {
                 SearchResult result = new SearchResult(table, res);
                 listener.handleResult(result);
@@ -109,50 +113,10 @@ public class Search {
             }
         } catch (SQLSyntaxErrorException ex) {
             listener.permissionError(table, ex);
-        } finally {
-            if (stm != null)
-                stm.close();
         }
     }
 
-    public static void main(String[] args) throws SQLException {
-        Db db = null;
-        try {
-            db = new Db(args[0], args[1], args[2]);
-            SearchListener listener = new SearchListener() {
-                boolean lastWasTable = true;
-
-                @Override
-                public void searchingTable(SearchTable tbl) {
-                    if (!lastWasTable)
-                        System.out.println();
-                    System.out.print("\rSearching table: " + tbl);
-                    lastWasTable = true;
-                }
-
-                @Override
-                public void handleResult(SearchResult result) {
-                    if (lastWasTable)
-                        System.out.println();
-                    System.out.println("   " + result);
-                    lastWasTable = false;
-                }
-
-                @Override
-                public void tooManyTableResults(SearchTable tbl) {
-                    System.out.println("   ...");
-                }
-
-                @Override
-                public void permissionError(SearchTable tbl, Exception ex) {
-                    System.out.println("\nPermission Error: " + tbl);
-                }
-            };
-            Search search = new Search(db, "prod", listener, false);
-            search.search();
-        } finally {
-            if (db != null)
-                db.close();
-        }
+    public static void search(Db db, SearchConf conf, SearchListener listener) throws SQLException {
+        new Search(db, conf, listener).search();
     }
 }
