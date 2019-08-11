@@ -139,7 +139,7 @@ public class Main implements Callable<Void> {
         Db db = null;
         try {
             db = new Db(jdbcUrl, user, password);
-            Search.search(db, searchConf, new CliSearchListener());
+            Search.search(db, searchConf, new CliSearchListener(searchConf));
             System.out.println("\nFinished.");
         } finally {
             if (db != null)
