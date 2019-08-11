@@ -1,4 +1,7 @@
-package dbsearch.db;
+package dbsearch;
+
+import dbsearch.db.SearchResult;
+import dbsearch.db.SearchTable;
 
 /**
  * dbsearch: SearchListener
