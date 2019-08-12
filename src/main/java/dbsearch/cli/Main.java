@@ -143,7 +143,6 @@ public class Main implements Callable<Void> {
         try {
             db = new Db(jdbcUrl, user, password);
             Search.search(db, searchConf, listener);
-            System.out.println("\nFinished.");
         } finally {
             if (db != null)
                 db.close();

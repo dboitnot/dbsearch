@@ -36,8 +36,8 @@ public class TerminalSearchListener implements SearchListener {
     @Override
     public void handleResult(SearchResult result) {
         if (lastWasTable)
-            System.out.println();
-        System.out.printf("%s%s\n", indent, formatResult(result));
+            out.println();
+        out.printf("%s%s\n", indent, formatResult(result));
         lastWasTable = false;
     }
 
