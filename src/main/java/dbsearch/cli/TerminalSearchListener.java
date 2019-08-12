@@ -5,22 +5,31 @@ import dbsearch.SearchListener;
 import dbsearch.db.SearchResult;
 import dbsearch.db.SearchTable;
 
+import java.io.PrintStream;
+
 import static java.lang.String.format;
 
-public class CliSearchListener implements SearchListener {
+public class TerminalSearchListener implements SearchListener {
     private final SearchConf conf;
+    private final PrintStream out;
+    private final PrintStream err;
+
+    private final String indent = "   ";
 
     private boolean lastWasTable = true;
 
-    CliSearchListener(SearchConf conf) {
+    TerminalSearchListener(SearchConf conf) {
         this.conf = conf;
+
+        out = System.out;
+        err = System.err;
     }
 
     @Override
     public void searchingTable(SearchTable tbl) {
         if (!lastWasTable)
-            System.out.println();
-        System.out.print(format("\rSearching table: %s \033[K", tbl));
+            out.println();
+        out.printf("\rSearching table: %s \033[K", tbl);
         lastWasTable = true;
     }
 
@@ -28,7 +37,7 @@ public class CliSearchListener implements SearchListener {
     public void handleResult(SearchResult result) {
         if (lastWasTable)
             System.out.println();
-        System.out.println("   " + formatResult(result));
+        System.out.printf("%s%s\n", indent, formatResult(result));
         lastWasTable = false;
     }
 
@@ -41,11 +50,11 @@ public class CliSearchListener implements SearchListener {
 
     @Override
     public void tooManyTableResults(SearchTable tbl) {
-        System.out.println("   ...");
+        out.printf("%s...\n", indent);
     }
 
     @Override
     public void permissionError(SearchTable tbl, Exception ex) {
-        System.out.println("\nPermission Error: " + tbl);
+        err.printf("\nPermission Error: %s\n", tbl);
     }
 }

@@ -1,6 +1,7 @@
 package dbsearch.cli;
 
 import dbsearch.SearchConf;
+import dbsearch.SearchListener;
 import dbsearch.db.Db;
 import dbsearch.db.Search;
 import picocli.CommandLine;
@@ -136,10 +137,12 @@ public class Main implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        SearchListener listener = new CliSearchListenerFactory().getListener(searchConf);
+
         Db db = null;
         try {
             db = new Db(jdbcUrl, user, password);
-            Search.search(db, searchConf, new CliSearchListener(searchConf));
+            Search.search(db, searchConf, listener);
             System.out.println("\nFinished.");
         } finally {
             if (db != null)
