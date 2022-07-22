@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches: ['*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    steps:
+      - name: Clean
+        run: mvn clean
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Package
+        run: mvn package
+
+      - name: Rename package
+        run: mv target/dbsearch-*-jar-with-dependencies.jar dbsearch-${{ github.run_number }}.jar
+
+      - name: Release
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.run_number }}
+          tag_name: r${{ github.run_number }}
+          fail_on_unmatched_files: true
+          files: dbsearch-${{ github.run_number }}.jar
